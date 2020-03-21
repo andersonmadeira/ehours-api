@@ -1,13 +1,20 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
-const ObjectId = mongoose.Schema.Types.ObjectId
+const ScheduleSchema = new mongoose.Schema({
+  date: String,
+  startDay: String,
+  startLunch: String,
+  endLunch: String,
+  endDay: String,
+})
 
 const UserSchema = new mongoose.Schema({
   name: String,
   username: String,
   password: String,
   email: String,
+  schedules: [ScheduleSchema],
 })
 
 UserSchema.pre('save', function(next) {

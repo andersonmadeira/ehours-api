@@ -8,14 +8,21 @@ const router = express.Router()
 router.use(jwtVerify)
 
 router.get('/', async function(req, res) {
-  Schedule.find({ user: req.user._id }, function(err, schedules) {
-    if (err) {
-      res.status(400).send(err)
-      return
-    }
-
-    res.send(schedules)
-  })
+  const { min, max } = req.query
+  console.log('min', min)
+  console.log('max', max)
+  Schedule.find({ user: req.user._id, date: { $gte: min, $lte: max } })
+    .sort({
+      date: 1,
+    })
+    .then(
+      function(schedules) {
+        res.send(schedules)
+      },
+      function(error) {
+        res.status(400).send(error)
+      }
+    )
 })
 
 router.get('/:id', function(req, res) {

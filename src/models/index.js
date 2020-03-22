@@ -3,17 +3,17 @@ const bcrypt = require('bcryptjs')
 
 const ScheduleSchema = new mongoose.Schema({
   date: {
-    type: String,
+    type: Date,
     required: '{PATH} is required!',
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: '{PATH} is required!',
   },
-  startDay: String,
-  startLunch: String,
-  endLunch: String,
-  endDay: String,
+  startDay: Date,
+  startLunch: Date,
+  endLunch: Date,
+  endDay: Date,
 })
 
 ScheduleSchema.index({ date: 1, user: 1 }, { unique: true })

@@ -14,6 +14,7 @@ const ScheduleSchema = new mongoose.Schema({
   startLunch: Date,
   endLunch: Date,
   endDay: Date,
+  workedMinutes: Number,
 })
 
 ScheduleSchema.index({ date: 1, user: 1 }, { unique: true })

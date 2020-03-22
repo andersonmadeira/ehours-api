@@ -1,5 +1,6 @@
 const express = require('express')
-const { User, Schedule } = require('../models')
+const { Schedule } = require('../models')
+const { differenceInMinutes } = require('date-fns')
 
 const { jwtVerify } = require('../middlewares')
 
@@ -38,13 +39,26 @@ router.get('/:id', function(req, res) {
 })
 
 router.post('/', async function(req, res) {
+  const { date, startDay, startLunch, endLunch, endDay } = req.body
+  const startDayDate = Date.parse(startDay),
+    startLunchDate = Date.parse(startLunch),
+    endLunchDate = Date.parse(endLunch),
+    endDayDate = Date.parse(endDay)
+
+  const workedMinutes =
+    startDayDate && startLunchDate && endLunchDate && endDayDate
+      ? differenceInMinutes(startLunchDate, startDayDate) +
+        differenceInMinutes(endDayDate, endLunchDate)
+      : 0
+
   const schedule = new Schedule({
-    date: req.body.date,
+    date: date,
     user: req.user._id,
-    startDay: req.body.startDay,
-    startLunch: req.body.startLunch,
-    endLunch: req.body.endLunch,
-    endDay: req.body.endDay,
+    startDay: startDayDate,
+    startLunch: startLunchDate,
+    endLunch: endLunchDate,
+    endDay: endDayDate,
+    workedMinutes: workedMinutes,
   })
 
   schedule.save().then(
@@ -58,11 +72,24 @@ router.post('/', async function(req, res) {
 })
 
 router.patch('/:id', async function(req, res) {
+  const { date, startDay, startLunch, endLunch, endDay } = req.body
+  const startDayDate = Date.parse(startDay),
+    startLunchDate = Date.parse(startLunch),
+    endLunchDate = Date.parse(endLunch),
+    endDayDate = Date.parse(endDay)
+
+  const workedMinutes =
+    startDayDate && startLunchDate && endLunchDate && endDayDate
+      ? differenceInMinutes(startLunchDate, startDayDate) +
+        differenceInMinutes(endDayDate, endLunchDate)
+      : 0
+
   const schedule = {
-    startDay: req.body.startDay,
-    startLunch: req.body.startLunch,
-    endLunch: req.body.endLunch,
-    endDay: req.body.endDay,
+    startDay: startDay,
+    startLunch: startLunch,
+    endLunch: endLunch,
+    endDay: endDay,
+    workedMinutes: workedMinutes,
   }
 
   Schedule.updateOne({ _id: req.params.id }, schedule, function(err, result) {

@@ -14,6 +14,7 @@ mongoose.connect(process.env.DB_CONNECTION_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
+mongoose.set('useCreateIndex', true)
 
 const app = express()
 const port = process.env.PORT || 3001
@@ -25,10 +26,6 @@ app.use(cors)
 
 app.use('/api/auth', authRouter)
 app.use('/api/schedules', schedulesRouter)
-
-app.get('/', function(req, res) {
-  res.send('Hello world!')
-})
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`)

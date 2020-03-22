@@ -2,19 +2,46 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
 const ScheduleSchema = new mongoose.Schema({
-  date: String,
+  date: {
+    type: String,
+    required: '{PATH} is required!',
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: '{PATH} is required!',
+  },
   startDay: String,
   startLunch: String,
   endLunch: String,
   endDay: String,
 })
 
+ScheduleSchema.index({ date: 1, user: 1 }, { unique: true })
+
+const Schedule = mongoose.model('Schedule', ScheduleSchema)
+
 const UserSchema = new mongoose.Schema({
-  name: String,
-  username: String,
-  password: String,
-  email: String,
-  schedules: [ScheduleSchema],
+  name: {
+    type: String,
+    required: '{PATH} is required!',
+  },
+  username: {
+    type: String,
+    required: '{PATH} is required!',
+  },
+  password: {
+    type: String,
+    required: '{PATH} is required!',
+  },
+  email: {
+    type: String,
+    required: '{PATH} is required!',
+  },
+  schedules: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+    },
+  ],
 })
 
 UserSchema.pre('save', function(next) {
@@ -37,3 +64,4 @@ UserSchema.methods.serialize = function() {
 const User = mongoose.model('User', UserSchema)
 
 module.exports.User = User
+module.exports.Schedule = Schedule

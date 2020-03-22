@@ -1,5 +1,5 @@
 const express = require('express')
-const { User } = require('../models')
+const { User, Schedule } = require('../models')
 
 const { jwtVerify } = require('../middlewares')
 
@@ -8,24 +8,63 @@ const router = express.Router()
 router.use(jwtVerify)
 
 router.get('/', async function(req, res) {
-  const user = await User.findById(req.user._id)
-  res.send(user.schedules)
+  Schedule.find({ user: req.user._id }, function(err, schedules) {
+    if (err) {
+      res.status(400).send(err)
+      return
+    }
+
+    res.send(schedules)
+  })
+})
+
+router.get('/:id', function(req, res) {
+  const { id } = req.params
+
+  Schedule.findById(id, function(err, schedule) {
+    if (err) {
+      res.status(500).send(err)
+    }
+
+    res.json(schedule)
+  })
 })
 
 router.post('/', async function(req, res) {
-  req.user.schedules.push({
+  const schedule = new Schedule({
     date: req.body.date,
+    user: req.user._id,
     startDay: req.body.startDay,
     startLunch: req.body.startLunch,
     endLunch: req.body.endLunch,
     endDay: req.body.endDay,
   })
 
-  const newSchedule = req.user.schedules[0]
+  schedule.save().then(
+    schedule => {
+      res.send(schedule)
+    },
+    error => {
+      res.status(500).send(error)
+    }
+  )
+})
 
-  await req.user.save()
+router.patch('/:id', async function(req, res) {
+  const schedule = {
+    startDay: req.body.startDay,
+    startLunch: req.body.startLunch,
+    endLunch: req.body.endLunch,
+    endDay: req.body.endDay,
+  }
 
-  res.send(newSchedule)
+  Schedule.updateOne({ _id: req.params.id }, schedule, function(err, result) {
+    if (err) {
+      res.status(500).send(err)
+    }
+
+    res.json(result)
+  })
 })
 
 module.exports = router

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const { format, differenceInMinutes } = require('date-fns')
 
 const ScheduleSchema = new mongoose.Schema({
   date: {
@@ -18,6 +19,20 @@ const ScheduleSchema = new mongoose.Schema({
 })
 
 ScheduleSchema.index({ date: 1, user: 1 }, { unique: true })
+
+ScheduleSchema.methods.serialize = function() {
+  return {
+    _id: this._id,
+    date: format(this.date, 'yyyy-MM-dd'),
+    user: this.user,
+    startDay: format(this.startDay, 'yyyy-MM-dd HH:mm'),
+    startLunch: format(this.startLunch, 'yyyy-MM-dd HH:mm'),
+    endLunch: format(this.endLunch, 'yyyy-MM-dd HH:mm'),
+    endDay: format(this.endDay, 'yyyy-MM-dd HH:mm'),
+    workedMinutes: this.workedMinutes,
+    __v: this.__v,
+  }
+}
 
 const Schedule = mongoose.model('Schedule', ScheduleSchema)
 

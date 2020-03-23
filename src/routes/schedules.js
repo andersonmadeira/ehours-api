@@ -4,21 +4,21 @@ const { differenceInMinutes } = require('date-fns')
 
 const { jwtVerify } = require('../middlewares')
 
+const { parse } = require('date-fns')
+
 const router = express.Router()
 
 router.use(jwtVerify)
 
 router.get('/', async function(req, res) {
   const { min, max } = req.query
-  console.log('min', min)
-  console.log('max', max)
   Schedule.find({ user: req.user._id, date: { $gte: min, $lte: max } })
     .sort({
       date: 1,
     })
     .then(
       function(schedules) {
-        res.send(schedules)
+        res.send(schedules.map(s => s.serialize()))
       },
       function(error) {
         res.status(400).send(error)
@@ -34,16 +34,16 @@ router.get('/:id', function(req, res) {
       res.status(500).send(err)
     }
 
-    res.json(schedule)
+    res.json(schedule.serialize())
   })
 })
 
 router.post('/', async function(req, res) {
-  const { date, startDay, startLunch, endLunch, endDay } = req.body
-  const startDayDate = Date.parse(startDay),
-    startLunchDate = Date.parse(startLunch),
-    endLunchDate = Date.parse(endLunch),
-    endDayDate = Date.parse(endDay)
+  const date = parse(req.body.date, 'yyyy-MM-dd', new Date()),
+    startDayDate = parse(req.body.startDay, 'yyyy-MM-dd HH:mm', new Date()),
+    startLunchDate = parse(req.body.startLunch, 'yyyy-MM-dd HH:mm', new Date()),
+    endLunchDate = parse(req.body.endLunch, 'yyyy-MM-dd HH:mm', new Date()),
+    endDayDate = parse(req.body.endDay, 'yyyy-MM-dd HH:mm', new Date())
 
   const workedMinutes =
     startDayDate && startLunchDate && endLunchDate && endDayDate
@@ -63,7 +63,7 @@ router.post('/', async function(req, res) {
 
   schedule.save().then(
     schedule => {
-      res.send(schedule)
+      res.send(schedule.serialize())
     },
     error => {
       res.status(500).send(error)
@@ -72,11 +72,11 @@ router.post('/', async function(req, res) {
 })
 
 router.patch('/:id', async function(req, res) {
-  const { date, startDay, startLunch, endLunch, endDay } = req.body
-  const startDayDate = Date.parse(startDay),
-    startLunchDate = Date.parse(startLunch),
-    endLunchDate = Date.parse(endLunch),
-    endDayDate = Date.parse(endDay)
+  const date = parse(req.body.date, 'yyyy-MM-dd'),
+    startDayDate = parse(req.body.startDay, 'yyyy-MM-dd HH:mm'),
+    startLunchDate = parse(req.body.startLunch, 'yyyy-MM-dd HH:mm'),
+    endLunchDate = parse(req.body.endLunch, 'yyyy-MM-dd HH:mm'),
+    endDayDate = parse(req.body.endDay, 'yyyy-MM-dd HH:mm')
 
   const workedMinutes =
     startDayDate && startLunchDate && endLunchDate && endDayDate
